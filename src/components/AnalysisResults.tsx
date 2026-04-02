@@ -1,5 +1,7 @@
 import { motion } from "framer-motion";
-import { AlertTriangle, HardHat, Shovel, Building2, Lightbulb, Gauge } from "lucide-react";
+import { AlertTriangle, HardHat, Shovel, Building2, Lightbulb } from "lucide-react";
+import CircularGauge from "./CircularGauge";
+import ReportGenerator from "./ReportGenerator";
 
 interface AnalysisData {
   invalid: boolean;
@@ -14,11 +16,12 @@ const typeIcons: Record<string, React.ElementType> = {
   Construction: Building2,
 };
 
-const getRiskColor = (score: number) => {
-  if (score <= 3) return "text-green-400";
-  if (score <= 6) return "text-yellow-400";
-  return "text-red-400";
-};
+const riskColorStops = [
+  { threshold: 0, color: "hsl(160, 60%, 45%)" },
+  { threshold: 30, color: "hsl(50, 90%, 50%)" },
+  { threshold: 60, color: "hsl(25, 90%, 55%)" },
+  { threshold: 80, color: "hsl(0, 72%, 51%)" },
+];
 
 const getRiskLabel = (score: number) => {
   if (score <= 3) return "Low Risk";
@@ -26,7 +29,7 @@ const getRiskLabel = (score: number) => {
   return "High Risk";
 };
 
-const AnalysisResults = ({ data }: { data: AnalysisData }) => {
+const AnalysisResults = ({ data, image }: { data: AnalysisData; image?: string }) => {
   if (data.invalid) {
     return (
       <motion.div
@@ -56,37 +59,23 @@ const AnalysisResults = ({ data }: { data: AnalysisData }) => {
       className="space-y-4 mt-6"
     >
       {/* Type & Score */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="glass rounded-xl p-5">
-          <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider mb-2">Category</p>
+          <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider mb-3">Category</p>
           <div className="flex items-center gap-2">
             <TypeIcon className="w-5 h-5 text-primary" />
             <span className="text-foreground font-semibold text-lg">{data.type}</span>
           </div>
         </div>
-        <div className="glass rounded-xl p-5">
+        <div className="glass rounded-xl p-5 flex flex-col items-center">
           <p className="text-xs text-muted-foreground font-mono uppercase tracking-wider mb-2">Dust Risk Score</p>
-          <div className="flex items-center gap-2">
-            <Gauge className="w-5 h-5 text-primary" />
-            <span className={`font-bold text-2xl font-mono ${getRiskColor(score)}`}>
-              {score.toFixed(1)}
-            </span>
-            <span className={`text-xs ${getRiskColor(score)}`}>/ 10 — {getRiskLabel(score)}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Risk bar */}
-      <div className="glass rounded-xl p-5">
-        <div className="w-full h-2 rounded-full bg-muted overflow-hidden">
-          <motion.div
-            className="h-full rounded-full"
-            style={{
-              background: `linear-gradient(90deg, hsl(var(--emerald)), ${score > 6 ? "#ef4444" : score > 3 ? "#eab308" : "hsl(var(--emerald))"})`,
-            }}
-            initial={{ width: 0 }}
-            animate={{ width: `${(score / 10) * 100}%` }}
-            transition={{ duration: 1, ease: "easeOut" }}
+          <CircularGauge
+            value={score}
+            max={10}
+            size={120}
+            strokeWidth={10}
+            sublabel={`/ 10 — ${getRiskLabel(score)}`}
+            colorStops={riskColorStops}
           />
         </div>
       </div>
@@ -116,6 +105,16 @@ const AnalysisResults = ({ data }: { data: AnalysisData }) => {
           </ul>
         </div>
       )}
+
+      {/* PDF Report Button */}
+      <ReportGenerator
+        data={{
+          image,
+          type: data.type,
+          score: data.score,
+          solutions: data.solutions,
+        }}
+      />
     </motion.div>
   );
 };

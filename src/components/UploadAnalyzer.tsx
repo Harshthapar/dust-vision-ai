@@ -149,7 +149,7 @@ const UploadAnalyzer = () => {
               )}
 
               <AnimatePresence>
-                {result && <AnalysisResults data={result} />}
+                {result && <AnalysisResults data={result} image={image ?? undefined} />}
               </AnimatePresence>
             </div>
           )}
