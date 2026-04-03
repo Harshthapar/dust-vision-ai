@@ -76,8 +76,8 @@ const ReportGenerator = ({ data }: { data?: ReportData }) => {
       pdf.setFont("helvetica", "normal");
       pdf.setTextColor(71, 85, 105);
       pdf.text("AQI: 127 (Unhealthy for Sensitive Groups)", 20, y); y += 7;
-      pdf.text("PM2.5: 42.3 μg/m³", 20, y); y += 7;
-      pdf.text("PM10: 78.6 μg/m³", 20, y); y += 14;
+      pdf.text("PM2.5: 42.3 ug/m\u00B3", 20, y); y += 7;
+      pdf.text("PM10: 78.6 ug/m\u00B3", 20, y); y += 14;
 
       // Mitigation Steps
       pdf.setFontSize(16);
