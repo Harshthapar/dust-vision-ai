@@ -11,6 +11,8 @@ import AboutSection from "@/components/AboutSection";
 const Index = () => {
   return (
     <div className="min-h-screen bg-background relative">
+      <DustParticles />
+      <div className="relative z-10">
       <Navbar />
       <HeroSection />
       <UploadAnalyzer />
