@@ -18,12 +18,34 @@ const sensitiveAreas = [
   { lat: 28.6, lng: 77.22, type: "hospital" as const, name: "Metro Health Center" },
 ];
 
-const cities: Record<string, [number, number]> = {
-  "delhi": [28.6139, 77.209],
-  "mumbai": [19.076, 72.8777],
-  "bangalore": [12.9716, 77.5946],
-  "new york": [40.7128, -74.006],
-  "london": [51.5074, -0.1278],
+const punjabZones = [
+  { lat: 30.7333, lng: 76.7794, radius: 500, aqi: 168, name: "Chandigarh Industrial Belt", color: "#ef4444" },
+  { lat: 31.326, lng: 75.5762, radius: 450, aqi: 155, name: "Jalandhar Construction Zone", color: "#ef4444" },
+  { lat: 30.9, lng: 75.857, radius: 400, aqi: 132, name: "Ludhiana Highway Expansion", color: "#f97316" },
+  { lat: 31.6340, lng: 74.8723, radius: 350, aqi: 145, name: "Amritsar Development Site", color: "#f97316" },
+  { lat: 30.3398, lng: 76.3869, radius: 300, aqi: 88, name: "Patiala Residential Area", color: "#eab308" },
+];
+
+const punjabSensitive = [
+  { lat: 30.74, lng: 76.77, type: "school" as const, name: "Punjab Engineering College" },
+  { lat: 31.32, lng: 75.59, type: "hospital" as const, name: "Civil Hospital Jalandhar" },
+  { lat: 30.91, lng: 75.85, type: "school" as const, name: "Ludhiana Public School" },
+  { lat: 31.64, lng: 74.88, type: "hospital" as const, name: "Guru Nanak Hospital Amritsar" },
+];
+
+const cities: Record<string, { center: [number, number]; zoom: number }> = {
+  "delhi": { center: [28.6139, 77.209], zoom: 13 },
+  "new delhi": { center: [28.6139, 77.209], zoom: 13 },
+  "mumbai": { center: [19.076, 72.8777], zoom: 12 },
+  "bangalore": { center: [12.9716, 77.5946], zoom: 12 },
+  "new york": { center: [40.7128, -74.006], zoom: 12 },
+  "london": { center: [51.5074, -0.1278], zoom: 12 },
+  "punjab": { center: [30.9, 75.85], zoom: 9 },
+  "chandigarh": { center: [30.7333, 76.7794], zoom: 13 },
+  "ludhiana": { center: [30.9, 75.857], zoom: 13 },
+  "amritsar": { center: [31.634, 74.8723], zoom: 13 },
+  "jalandhar": { center: [31.326, 75.5762], zoom: 13 },
+  "patiala": { center: [30.3398, 76.3869], zoom: 13 },
 };
 
 const MapRecenter = ({ center }: { center: [number, number] }) => {
