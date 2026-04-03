@@ -35,6 +35,7 @@ const Index = () => {
           <p className="mt-1 text-xs text-muted-foreground/50 font-mono">Impact of Construction on Local Air Quality</p>
         </div>
       </footer>
+      </div>
     </div>
   );
 };

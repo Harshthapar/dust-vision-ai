@@ -154,7 +154,7 @@ const PollutionMap = () => {
                   </Popup>
                 </CircleMarker>
               ))}
-              {sensitiveAreas.map((area, i) => (
+              {allSensitive.map((area, i) => (
                 <CircleMarker
                   key={`s-${i}`}
                   center={[area.lat, area.lng]}
