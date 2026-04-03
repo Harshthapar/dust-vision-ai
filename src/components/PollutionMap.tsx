@@ -56,12 +56,17 @@ const MapRecenter = ({ center, zoom }: { center: [number, number]; zoom: number 
 
 const PollutionMap = () => {
   const [center, setCenter] = useState<[number, number]>([28.6139, 77.209]);
+  const [zoom, setZoom] = useState(13);
   const [search, setSearch] = useState("");
+
+  const allZones = [...pollutionZones, ...punjabZones];
+  const allSensitive = [...sensitiveAreas, ...punjabSensitive];
 
   const handleSearch = () => {
     const key = search.toLowerCase().trim();
     if (cities[key]) {
-      setCenter(cities[key]);
+      setCenter(cities[key].center);
+      setZoom(cities[key].zoom);
       setSearch("");
     }
   };
