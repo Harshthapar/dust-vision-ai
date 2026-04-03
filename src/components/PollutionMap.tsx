@@ -130,7 +130,7 @@ const PollutionMap = () => {
               style={{ height: "100%", width: "100%" }}
               className="z-0"
             >
-              <MapRecenter center={center} />
+              <MapRecenter center={center} zoom={zoom} />
               <TileLayer
                 attribution='&copy; <a href="https://carto.com/">CARTO</a>'
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
