@@ -1,98 +1,87 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useEffect, useRef } from "react";
 
-interface Particle {
-  x: number;
-  y: number;
-  size: number;
-  speedX: number;
-  speedY: number;
-  opacity: number;
-  blur: number;
-  depth: number;
-}
-
-const PARTICLE_COUNT = 60;
-const REDUCED_COUNT = 25;
+const PARTICLE_COUNT = 30;
+const REDUCED_COUNT = 12;
 
 const DustParticles = () => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const mouseRef = useRef({ x: 0, y: 0 });
-  const particlesRef = useRef<Particle[]>([]);
   const rafRef = useRef<number>(0);
-  const prefersReducedMotion = useRef(false);
-
-  const createParticle = useCallback((w: number, h: number): Particle => {
-    const depth = Math.random();
-    return {
-      x: Math.random() * w,
-      y: Math.random() * h,
-      size: 1 + depth * 3,
-      speedX: (Math.random() - 0.5) * 0.3,
-      speedY: -(0.1 + Math.random() * 0.4),
-      opacity: 0.08 + depth * 0.18,
-      blur: (1 - depth) * 2,
-      depth,
-    };
-  }, []);
 
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
-    const ctx = canvas.getContext("2d");
+    const ctx = canvas.getContext("2d", { alpha: true });
     if (!ctx) return;
 
-    prefersReducedMotion.current = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const count = reducedMotion ? REDUCED_COUNT : PARTICLE_COUNT;
+
+    let w = window.innerWidth;
+    let h = window.innerHeight;
 
     const resize = () => {
-      const dpr = Math.min(window.devicePixelRatio, 2);
-      canvas.width = window.innerWidth * dpr;
-      canvas.height = window.innerHeight * dpr;
-      canvas.style.width = window.innerWidth + "px";
-      canvas.style.height = window.innerHeight + "px";
-      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      w = window.innerWidth;
+      h = window.innerHeight;
+      canvas.width = w;
+      canvas.height = h;
     };
     resize();
 
-    const count = prefersReducedMotion.current ? REDUCED_COUNT : PARTICLE_COUNT;
-    particlesRef.current = Array.from({ length: count }, () =>
-      createParticle(window.innerWidth, window.innerHeight)
-    );
+    // Pre-compute particles as flat typed arrays for speed
+    const x = new Float32Array(count);
+    const y = new Float32Array(count);
+    const size = new Float32Array(count);
+    const sx = new Float32Array(count);
+    const sy = new Float32Array(count);
+    const op = new Float32Array(count);
+
+    for (let i = 0; i < count; i++) {
+      x[i] = Math.random() * w;
+      y[i] = Math.random() * h;
+      const depth = Math.random();
+      size[i] = 1 + depth * 2.5;
+      sx[i] = (Math.random() - 0.5) * 0.2;
+      sy[i] = -(0.08 + Math.random() * 0.25);
+      op[i] = 0.06 + depth * 0.14;
+    }
 
     const onMouse = (e: MouseEvent) => {
-      mouseRef.current = { x: e.clientX, y: e.clientY };
+      mouseRef.current.x = e.clientX;
+      mouseRef.current.y = e.clientY;
     };
     window.addEventListener("mousemove", onMouse, { passive: true });
     window.addEventListener("resize", resize, { passive: true });
 
-    const animate = () => {
-      const w = window.innerWidth;
-      const h = window.innerHeight;
+    let lastTime = 0;
+    const interval = reducedMotion ? 66 : 33; // ~30fps or ~15fps
+
+    const animate = (time: number) => {
+      rafRef.current = requestAnimationFrame(animate);
+      if (time - lastTime < interval) return;
+      lastTime = time;
+
       ctx.clearRect(0, 0, w, h);
 
-      const mx = mouseRef.current.x / w - 0.5;
-      const my = mouseRef.current.y / h - 0.5;
+      const mx = (mouseRef.current.x / w - 0.5) * 0.3;
+      const my = (mouseRef.current.y / h - 0.5) * 0.2;
 
-      for (const p of particlesRef.current) {
-        p.x += p.speedX + mx * p.depth * 0.5;
-        p.y += p.speedY + my * p.depth * 0.3;
+      for (let i = 0; i < count; i++) {
+        x[i] += sx[i] + mx;
+        y[i] += sy[i] + my;
 
-        if (p.y < -10) { p.y = h + 10; p.x = Math.random() * w; }
-        if (p.x < -10) p.x = w + 10;
-        if (p.x > w + 10) p.x = -10;
+        if (y[i] < -5) { y[i] = h + 5; x[i] = Math.random() * w; }
+        if (x[i] < -5) x[i] = w + 5;
+        else if (x[i] > w + 5) x[i] = -5;
 
-        ctx.save();
-        if (p.blur > 0.5) ctx.filter = `blur(${p.blur}px)`;
-        ctx.globalAlpha = p.opacity;
+        ctx.globalAlpha = op[i];
         ctx.beginPath();
-        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
-        ctx.fillStyle = `hsl(40, 15%, ${70 + p.depth * 20}%)`;
-        ctx.shadowColor = `hsla(40, 20%, 80%, ${p.opacity * 0.6})`;
-        ctx.shadowBlur = 6 * p.depth;
+        ctx.arc(x[i], y[i], size[i], 0, 6.2832);
+        ctx.fillStyle = "#c8c0b0";
         ctx.fill();
-        ctx.restore();
       }
 
-      rafRef.current = requestAnimationFrame(animate);
+      ctx.globalAlpha = 1;
     };
     rafRef.current = requestAnimationFrame(animate);
 
@@ -101,7 +90,7 @@ const DustParticles = () => {
       window.removeEventListener("mousemove", onMouse);
       window.removeEventListener("resize", resize);
     };
-  }, [createParticle]);
+  }, []);
 
   return (
     <canvas
