@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import DustParticles from "@/components/DustParticles";
 import HeroSection from "@/components/HeroSection";
 import UploadAnalyzer from "@/components/UploadAnalyzer";
 import AirQualityDashboard from "@/components/AirQualityDashboard";
