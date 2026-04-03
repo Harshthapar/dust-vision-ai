@@ -1,5 +1,5 @@
-import { Eye, Menu, X } from "lucide-react";
-import { useState } from "react";
+import { Eye, Menu, X, Sun, Moon } from "lucide-react";
+import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const navLinks = [
@@ -13,6 +13,12 @@ const navLinks = [
 
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dark, setDark] = useState(true);
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", dark);
+    document.documentElement.classList.toggle("light", !dark);
+  }, [dark]);
 
   return (
     <nav className="fixed top-0 inset-x-0 z-50 glass-strong">
@@ -39,24 +45,42 @@ const Navbar = () => {
           ))}
         </div>
 
-        <a
-          href="#analyzer"
-          className="hidden md:block text-sm font-medium text-primary-foreground bg-primary px-4 py-2 rounded-lg hover:brightness-110 transition-all"
-        >
-          Try Analyzer
-        </a>
+        <div className="hidden md:flex items-center gap-2">
+          <button
+            onClick={() => setDark(!dark)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-muted/50 transition-colors"
+            aria-label="Toggle theme"
+          >
+            {dark ? <Sun className="w-4 h-4 text-foreground" /> : <Moon className="w-4 h-4 text-foreground" />}
+          </button>
+          <a
+            href="#analyzer"
+            className="text-sm font-medium text-primary-foreground bg-primary px-4 py-2 rounded-lg hover:brightness-110 transition-all"
+          >
+            Try Analyzer
+          </a>
+        </div>
 
         {/* Mobile toggle */}
-        <button
-          className="md:hidden w-9 h-9 flex items-center justify-center rounded-lg hover:bg-muted/50 transition-colors"
-          onClick={() => setMobileOpen(!mobileOpen)}
-        >
-          {mobileOpen ? (
-            <X className="w-5 h-5 text-foreground" />
-          ) : (
-            <Menu className="w-5 h-5 text-foreground" />
-          )}
-        </button>
+        <div className="md:hidden flex items-center gap-1">
+          <button
+            onClick={() => setDark(!dark)}
+            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-muted/50 transition-colors"
+            aria-label="Toggle theme"
+          >
+            {dark ? <Sun className="w-4 h-4 text-foreground" /> : <Moon className="w-4 h-4 text-foreground" />}
+          </button>
+          <button
+            className="w-9 h-9 flex items-center justify-center rounded-lg hover:bg-muted/50 transition-colors"
+            onClick={() => setMobileOpen(!mobileOpen)}
+          >
+            {mobileOpen ? (
+              <X className="w-5 h-5 text-foreground" />
+            ) : (
+              <Menu className="w-5 h-5 text-foreground" />
+            )}
+          </button>
+        </div>
       </div>
 
       {/* Mobile menu */}
