@@ -1,4 +1,5 @@
 import Navbar from "@/components/Navbar";
+import DustParticles from "@/components/DustParticles";
 import HeroSection from "@/components/HeroSection";
 import UploadAnalyzer from "@/components/UploadAnalyzer";
 import AirQualityDashboard from "@/components/AirQualityDashboard";
@@ -10,6 +11,8 @@ import AboutSection from "@/components/AboutSection";
 const Index = () => {
   return (
     <div className="min-h-screen bg-background relative">
+      <DustParticles />
+      <div className="relative z-10">
       <Navbar />
       <HeroSection />
       <UploadAnalyzer />
@@ -32,6 +35,7 @@ const Index = () => {
           <p className="mt-1 text-xs text-muted-foreground/50 font-mono">Impact of Construction on Local Air Quality</p>
         </div>
       </footer>
+      </div>
     </div>
   );
 };
