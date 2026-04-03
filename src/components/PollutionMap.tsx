@@ -48,9 +48,9 @@ const cities: Record<string, { center: [number, number]; zoom: number }> = {
   "patiala": { center: [30.3398, 76.3869], zoom: 13 },
 };
 
-const MapRecenter = ({ center }: { center: [number, number] }) => {
+const MapRecenter = ({ center, zoom }: { center: [number, number]; zoom: number }) => {
   const map = useMap();
-  map.setView(center, 13);
+  map.setView(center, zoom);
   return null;
 };
 
