@@ -135,7 +135,7 @@ const PollutionMap = () => {
                 attribution='&copy; <a href="https://carto.com/">CARTO</a>'
                 url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png"
               />
-              {pollutionZones.map((zone, i) => (
+              {allZones.map((zone, i) => (
                 <CircleMarker
                   key={i}
                   center={[zone.lat, zone.lng]}
