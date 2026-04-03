@@ -5,7 +5,8 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 @layer base {
-  :root {
+  :root,
+  .dark {
     --background: 222 47% 6%;
     --foreground: 210 20% 90%;
 
@@ -40,6 +41,43 @@
     --emerald-glow: 160 70% 50%;
     --slate-deep: 222 47% 4%;
     --grid-color: 215 20% 12%;
+  }
+
+  .light {
+    --background: 210 20% 96%;
+    --foreground: 222 47% 11%;
+
+    --card: 0 0% 100%;
+    --card-foreground: 222 47% 11%;
+
+    --popover: 0 0% 100%;
+    --popover-foreground: 222 47% 11%;
+
+    --primary: 160 60% 38%;
+    --primary-foreground: 0 0% 100%;
+
+    --secondary: 210 15% 90%;
+    --secondary-foreground: 222 47% 20%;
+
+    --muted: 210 15% 92%;
+    --muted-foreground: 215 16% 45%;
+
+    --accent: 160 60% 38%;
+    --accent-foreground: 0 0% 100%;
+
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 215 15% 85%;
+    --input: 215 15% 85%;
+    --ring: 160 60% 38%;
+
+    --radius: 0.75rem;
+
+    --emerald: 160 60% 38%;
+    --emerald-glow: 160 70% 45%;
+    --slate-deep: 210 20% 94%;
+    --grid-color: 215 15% 90%;
   }
 }
 
