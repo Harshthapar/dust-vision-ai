@@ -10,7 +10,14 @@ serve(async (req) => {
 
   try {
     const { image, mimeType } = await req.json();
-    if (!image || !mimeType) {
+    const cleanedImage = typeof image === "string"
+      ? image.trim().replace(/^data:[^,]+,/, "").replace(/\s/g, "")
+      : "";
+    const cleanMimeType = typeof mimeType === "string" && mimeType.startsWith("image/")
+      ? mimeType
+      : "image/jpeg";
+
+    if (!cleanedImage) {
       return new Response(JSON.stringify({ error: "Missing image data" }), {
         status: 400,
         headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -29,7 +36,7 @@ Step 3: If it IS, return: {
   "score": <float 1.0-10.0 representing dust risk>,
   "solutions": ["solution1", "solution2", "solution3"]
 }
-Return ONLY valid JSON, no markdown.`;
+Return ONLY valid JSON, no markdown. Do not include explanatory text before or after the JSON.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -38,13 +45,13 @@ Return ONLY valid JSON, no markdown.`;
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-flash",
+        model: "google/gemini-3-flash-preview",
         messages: [
           {
             role: "user",
             content: [
               { type: "text", text: prompt },
-              { type: "image_url", image_url: { url: `data:${mimeType};base64,${image}` } },
+              { type: "image_url", image_url: { url: `data:${cleanMimeType};base64,${cleanedImage}` } },
             ],
           },
         ],
@@ -65,7 +72,11 @@ Return ONLY valid JSON, no markdown.`;
           headers: { ...corsHeaders, "Content-Type": "application/json" },
         });
       }
-      throw new Error(`AI gateway error: ${status}`);
+      const details = await response.text().catch(() => "");
+      console.error("AI gateway error:", status, details);
+      return new Response(JSON.stringify({ invalid: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const aiResult = await response.json();
@@ -74,7 +85,10 @@ Return ONLY valid JSON, no markdown.`;
     // Strip markdown code fences if present
     content = content.replace(/```json\s*/gi, "").replace(/```\s*/gi, "").trim();
 
-    const parsed = JSON.parse(content);
+    const jsonMatch = content.match(/\{[\s\S]*\}/);
+    const parsed = JSON.parse(jsonMatch?.[0] ?? content);
+    if (typeof parsed?.invalid !== "boolean") throw new Error("Invalid AI response shape");
+
     return new Response(JSON.stringify(parsed), {
       headers: { ...corsHeaders, "Content-Type": "application/json" },
     });
