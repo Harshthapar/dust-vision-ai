@@ -12,6 +12,44 @@ interface AnalysisData {
   solutions?: string[];
 }
 
+const MAX_ANALYSIS_DIMENSION = 1024;
+const ANALYSIS_IMAGE_QUALITY = 0.72;
+
+const dataUrlToBase64 = (dataUrl: string) => dataUrl.split(",")[1]?.replace(/\s/g, "") ?? "";
+
+const fileToDataUrl = (f: File) =>
+  new Promise<string>((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(String(reader.result ?? ""));
+    reader.onerror = () => reject(new Error("Unable to read image file."));
+    reader.readAsDataURL(f);
+  });
+
+const compressImageForAnalysis = async (f: File) => {
+  const sourceUrl = await fileToDataUrl(f);
+  const img = await new Promise<HTMLImageElement>((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(image);
+    image.onerror = () => reject(new Error("Unable to load image file."));
+    image.src = sourceUrl;
+  });
+
+  const largestSide = Math.max(img.naturalWidth || img.width, img.naturalHeight || img.height);
+  const scale = Math.min(1, MAX_ANALYSIS_DIMENSION / Math.max(1, largestSide));
+  const width = Math.max(1, Math.round((img.naturalWidth || img.width) * scale));
+  const height = Math.max(1, Math.round((img.naturalHeight || img.height) * scale));
+
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return { image: dataUrlToBase64(sourceUrl), mimeType: f.type };
+
+  ctx.drawImage(img, 0, 0, width, height);
+  const compressedUrl = canvas.toDataURL("image/jpeg", ANALYSIS_IMAGE_QUALITY);
+  return { image: dataUrlToBase64(compressedUrl), mimeType: "image/jpeg" };
+};
+
 const UploadAnalyzer = () => {
   const [image, setImage] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
@@ -46,21 +84,26 @@ const UploadAnalyzer = () => {
     setResult(null);
 
     try {
-      // Convert file to base64
-      const buffer = await file.arrayBuffer();
-      const base64 = btoa(
-        new Uint8Array(buffer).reduce((data, byte) => data + String.fromCharCode(byte), "")
-      );
+      const preparedImage = await compressImageForAnalysis(file);
 
       const { data, error: fnError } = await supabase.functions.invoke("analyze-site", {
-        body: { image: base64, mimeType: file.type },
+        body: preparedImage,
       });
 
-      if (fnError) throw fnError;
+      if (fnError) {
+        const context = (fnError as { context?: Response }).context;
+        const payload = context ? await context.clone().json().catch(() => null) : null;
+        throw new Error(payload?.error || fnError.message);
+      }
+
+      if (!data || typeof (data as AnalysisData).invalid !== "boolean") {
+        throw new Error("Analysis returned an unexpected response.");
+      }
+
       setResult(data as AnalysisData);
     } catch (err: any) {
       console.error(err);
-      setError("Analysis failed. Please try again.");
+      setError(err?.message || "Analysis failed. Please try again.");
     } finally {
       setAnalyzing(false);
     }
