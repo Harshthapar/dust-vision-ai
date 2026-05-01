@@ -74,7 +74,9 @@ Return ONLY valid JSON, no markdown. Do not include explanatory text before or a
       }
       const details = await response.text().catch(() => "");
       console.error("AI gateway error:", status, details);
-      throw new Error(`AI gateway error: ${status}`);
+      return new Response(JSON.stringify({ invalid: true }), {
+        headers: { ...corsHeaders, "Content-Type": "application/json" },
+      });
     }
 
     const aiResult = await response.json();
